@@ -1,7 +1,11 @@
 var multipick = require('..');
 var StreamString = require('../streamstring');
 var test = require('tap').test;
+var pathutil = require('path');
 var fs = require('fs');
+
+const adjectiveFile = pathutil.join(__dirname, '../assets/adjectives.txt');
+const nounFile = pathutil.join(__dirname, '../assets/nouns.txt');
 
 test('multipicker.pick: returns stuff', function (t) {
   var picker = new multipick([['a'], ['a', 'b'], ['a', 'b', 'c'], ['a', 'b', 'c', 'd']]);
@@ -26,9 +30,9 @@ test('piping', function (t) {
     ['b', '2'],
     ['c', '3'],
   ]);
-  picker.format('%s-%s-%s').pipe(streamstring);
+  picker.pipe(streamstring);
   picker.on('end', function () {
-    var expect = 'a-b-c\n1-b-c\na-2-c\n1-2-c\na-b-3\n1-b-3\na-2-3\n1-2-3\n';
+    var expect = 'a,b,c\n1,b,c\na,2,c\n1,2,c\na,b,3\n1,b,3\na,2,3\n1,2,3\n';
     t.same(streamstring.value(), expect);
     t.end();
   });
