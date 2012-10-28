@@ -1,77 +1,66 @@
-const fs = require('fs');
-const nounFile = 'assets/nouns.txt';
-const adjectivesFile = 'assets/adjectives.txt';
+var Places = require('./places');
+var Stream = require('stream');
+var util = require('util');
 
-function loadIntoArray(file) {
-  var buf = fs.readFileSync(file);
-  return buf.toString().trim().split('\n')
+function multipick(set) {
+  this._set = set;
+  this._seperator = '\n';
+  this._format = set.map(function () {
+    return '%s';
+  }).join(',');
+  process.nextTick(function () {
+    this.go();
+  }.bind(this));
 }
+util.inherits(multipick, Stream)
 
-function randomElement(array) {
-  var length = array.length;
-  return array[Math.random() * length | 0];
-}
-
-function makePhrase(options) {
-  const nouns = options.nouns;
-  const adjectives = options.adjectives;
-  return [adjective, noun].join('-')
-}
-
-var prototype = {};
-prototype.phrase = function phrase() {
-  const adjective = randomElement(this.adjectives);
-  const noun = randomElement(this.nouns);
-  return [adjective, noun].join('-');
-}
-
-prototype.next = function next() {
-  var phrase;
-  if (this.generated >= this.limit)
-    throw new Error('Unique phrases exhausted.');
-
-  do phrase = this.phrase();
-  while (this.found[phrase]);
-
-  this.generated++;
-  return this.found[phrase] = phrase;
+multipick.prototype.separator = function separator(chr) {
+  this._seperator = chr;
+  return this;
 };
 
-prototype.reset = function reset() {
-  this.generated = 0;
-  this.found = {};
+multipick.prototype.format = function format(fmt) {
+  this._format = fmt;
+  return this;
 };
 
-prototype.many = function many(n) {
-  var phrases = [];
-  while (n-- && n >= 0)
-    phrases.push(this.next());
-  return phrases;
+multipick.prototype.go = function go() {
+  var setLen = this._set.length;
+  var maximums = [];
+  var places;
+  for (var i = 0; i < setLen; i++)
+    maximums.push(this._set[i].length - 1);
+  places = new Places(maximums);
+  do {
+    this.emit('data', this.output(places.value));
+  } while (places.inc());
+  return this.emit('end');
 };
 
-prototype.all = function all() {
-  var phrases;
-  var cache = {
-    generated: this.generated,
-    found: this.found
-  };
-  this.reset();
-  phrases = this.many(this.limit);
-  this.generated = cache.generated;
-  this.found = cache.found;
-  return phrases;
+multipick.prototype.output = function output(indices) {
+  var value = this.pickOne(indices);
+  var format = this._format;
+  var separator = this._seperator || '';
+  var str;
+  if (format) {
+    str = util.format.bind(util, format).apply(util, value);
+    return str + separator;
+  }
+  return value.toString() + separator;
 };
 
-module.exports = function phrasegen(options) {
-  options = options || {};
-  const adjectives = options.adjectives || loadIntoArray(adjectivesFile);
-  const nouns = options.nouns || loadIntoArray(nounFile);
-  var generator = Object.create(prototype, {
-    nouns:      { value: nouns },
-    adjectives: { value: adjectives },
-    limit:      { value: adjectives.length * nouns.length },
-    generated:  { value: 0,  writable: true },
-    found:      { value: {}, writable: true }
-  });
-  return generator;
+multipick.prototype.pickOne = function pickOne(indices) {
+  var data = this._set;
+  var result = [];
+  var element, idx;
+  for (var i = 0; i < data.length; i++) {
+    idx = indices[i];
+    element = data[i][idx];
+    result[i] = element;
+    if (idx >= data.length || typeof element === 'undefined')
+      return null;
+  }
+  return result;
 };
+
+module.exports = multipick;
