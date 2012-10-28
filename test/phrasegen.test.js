@@ -3,17 +3,17 @@ var StreamString = require('../streamstring');
 var test = require('tap').test;
 var fs = require('fs');
 
-test('multipicker.pickOne: returns stuff', function (t) {
+test('multipicker.pick: returns stuff', function (t) {
   var picker = new multipick([['a'], ['a', 'b'], ['a', 'b', 'c'], ['a', 'b', 'c', 'd']]);
-  var result = picker.pickOne([0, 1, 2, 3]);
+  var result = picker.pick([0, 1, 2, 3]);
   var expect = ['a','b','c','d'];
   t.same(result, expect);
   t.end();
 });
 
-test('multipicker.pickOne: returns false when any index is out of bounds', function (t) {
+test('multipicker.pick: returns false when any index is out of bounds', function (t) {
   var picker = new multipick([['a'], ['a', 'b'], ['a', 'b', 'c'], ['a', 'b', 'c', 'd']]);
-  var result = picker.pickOne([0, 1, 2, 9]);
+  var result = picker.pick([0, 1, 2, 9]);
   var expect = null;
   t.same(result, expect);
   t.end();
