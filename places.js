@@ -9,7 +9,7 @@ Places.prototype.inc = function inc(amount) {
   // cheap equality check
   if (this.value.join() === this.maximums.join())
     return false;
-  
+
   if (this.value[idx] + 1 > this.maximums[idx]) {
     do {
       this.value[idx] = 0;
@@ -21,6 +21,10 @@ Places.prototype.inc = function inc(amount) {
     this.value[idx]++;
   }
   return true;
+};
+
+Places.prototype.maxedOut = function maxedOut() {
+  return this.value.join() === this.maximums.join();
 };
 
 module.exports = Places;

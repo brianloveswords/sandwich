@@ -3,110 +3,68 @@ var Stream = require('stream');
 var util = require('util');
 var async = require('async');
 
-function Multipick(set) {
+function Multipick(datasets) {
   if (!(this instanceof Multipick))
-    return new Multipick(set);
-  this._seperator = '\n';
-  this._format = set.map(function () {
-    return '%s';
-  }).join(',');
-  this.processInput(set);
+    return new Multipick(datasets);
+  this.nextable = true;
+  this.separator('\n');
+  this.format(datasets.map(identity('%s')).join(','));
+  this.processDataset(datasets);
+}; util.inherits(Multipick, Stream)
+
+function identity(value) {
+  return function () { return value };
 }
-util.inherits(Multipick, Stream)
 
-Multipick.prototype.processInput = function processInput(set) {
-  this._set = set;
+/**
+ * Stub, just in case we want to handle different types of inputs.
+ */
 
-  if (Array.isArray(set[0]))
-    return this.beginEmitting();
-
-  async.map(set, processStream, function (err, results) {
-    if (err) throw err;
-    this._set = results;
-    return this.beginEmitting();
-  }.bind(this));
+Multipick.prototype.processDataset = function processDataset(datasets) {
+  var maximums;
+  maximums = datasets.map(function (set) {
+    return set.length - 1;
+  });
+  this.possibilities = maximums.reduce(function (product, value) {
+    return product * (value + 1);
+  }, 1);
+  this._datasets = datasets;
+  this._indices = new Places(maximums);
 };
 
-function processStream(stream, callback) {
-  var buffer = Buffer(0);
-  var result;
-  stream.on('data', function (buf) {
-    buffer = Buffer.concat([buffer, buf]);
-  }).once('end', function () {
-    result = buffer.toString().trim().split('\n');
-    callback(null, result);
-  }).once('error', function (err) {
-    callback(err);
-  });
-}
+/**
+ * Override `pipe` inherited from Stream
+ */
+Multipick.prototype.pipe = function pipe(endpoint) {
+  this.beginEmitting();
+  return Stream.prototype.pipe.call(this, endpoint);
+};
 
 /**
  * Start emitting `data` events. You shouldn't have to call this manually
  */
 
 Multipick.prototype.beginEmitting = function beginEmitting() {
-  this.emit('begin');
   process.nextTick(function () {
-    var maximums = this.calculateMaximums();
-    var places = new Places(maximums);
-    do
-      this.emit('data', this.output(places.value));
-    while (places.inc());
+    var value;
+    while ((value = this.next()))
+      this.emit('data', this.formatOutput(value));
     return this.emit('end');
   }.bind(this));
-};
-
-/**
- * Calculate the maximum amount for each set
- *
- * @return {Array} An array of all the maximum indices for each item in
- *   the set defined in the constructor.
- */
-
-Multipick.prototype.calculateMaximums = function calculateMaximums() {
-  var setLen = this._set.length;
-  var maximums = [];
-  for (var i = 0; i < setLen; i++)
-    maximums.push(this._set[i].length - 1);
-  return maximums;
-};
-
-/**
- * Set the separator at the end of the string when emitting events
- *
- * @param {String} str
- * @return {this}
- */
-
-Multipick.prototype.separator = function separator(str) {
-  this._seperator = str;
   return this;
 };
 
-
-/**
- * Set the format for the output. Will be passed to `util.format`
- *
- * @param {String} fmt
- * @return {this}
- */
-
-Multipick.prototype.format = function format(fmt) {
-  this._format = fmt;
-  return this;
-};
 
 /**
  * Get the formatted output for an index array
  *
- * @param {Array} indices An array of indices to pull from the datasets
+ * @param {Array} value Array of values to format
  * @return {String} formatted output
  */
 
-Multipick.prototype.output = function output(indices) {
-  var value = this.pick(indices);
-  var format = this._format;
-  var separator = this._seperator || '';
+Multipick.prototype.formatOutput = function formatOutput(value) {
+  var format = this.format();
+  var separator = this.separator() || '';
   var str;
   if (format) {
     str = util.format.bind(util, format).apply(util, value);
@@ -114,6 +72,27 @@ Multipick.prototype.output = function output(indices) {
   }
   return value.toString() + separator;
 };
+
+/**
+ * Set the format for the output. Will be passed to `util.format`
+ */
+Multipick.prototype.format = accessor('_format');
+
+
+/**
+ * Set the separator at the end of the string when emitting events
+ */
+Multipick.prototype.separator = accessor('_separator');
+
+function accessor(key) {
+  return function (value) {
+    if (arguments.length > 0) {
+      this[key] = value;
+      return this;
+    }
+    return this[key];
+  }
+}
 
 /**
  * Pick a set of elements from the dataset by an array of indices
@@ -124,7 +103,7 @@ Multipick.prototype.output = function output(indices) {
  */
 
 Multipick.prototype.pick = function pick(indices) {
-  var data = this._set;
+  var data = this._datasets;
   var result = [];
   var collection, element, elementIndex;
   for (var i = 0; i < data.length; i++) {
@@ -139,13 +118,28 @@ Multipick.prototype.pick = function pick(indices) {
 };
 
 /**
+ * Pretend we have a real generator.
+ */
+
+Multipick.prototype.next = function next() {
+  if (!this.nextable)
+    return null;
+
+  var indices, value;
+  indices = this._indices;
+  value = this.pick(indices.value);
+  this.nextable = indices.inc();
+  return value;
+};
+
+/**
  * Randomize the datasets.
  *
  * @return {this}
  */
 
 Multipick.prototype.randomize = function randomize() {
-  var data = this._set;
+  var data = this._datasets;
   for (var i = 0; i < data.length; i++)
     data[i].sort(shuffle);
   return this;
@@ -154,6 +148,6 @@ Multipick.prototype.randomize = function randomize() {
 function shuffle() { return coin(); }
 function coin() { return Math.round(Math.random()); }
 
-module.exports = function multipick(set) {
-  return new Multipick(set);
+module.exports = function multipick(dataset) {
+  return new Multipick(dataset);
 };
