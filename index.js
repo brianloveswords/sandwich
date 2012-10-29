@@ -65,15 +65,18 @@ Sandwich.prototype.next = function next() {
  * @return {this}
  */
 
-Sandwich.prototype.randomize = function randomize() {
-  var data = this._datasets;
-  for (var i = 0; i < data.length; i++)
-    data[i].sort(shuffle);
+Sandwich.prototype.shuffle = function randomize() {
+  var datasets = this._datasets;
+  var idx = datasets.length;
+  while (idx--)
+    datasets[idx].sort(shuffleSort);
   return this;
 };
 
-function shuffle() { return coin(); }
-function coin() { return Math.round(Math.random()); }
+// we want a value between -1 and 1
+function shuffleSort() {
+  return (Math.random() * 3 | 0) - 1;
+}
 
 module.exports = function sandwich(dataset) {
   return new Sandwich(dataset);
