@@ -1,7 +1,6 @@
 var Places = require('./places');
 var Stream = require('stream');
 var util = require('util');
-var async = require('async');
 
 function Sandwich(datasets) {
   if (!(this instanceof Sandwich))
