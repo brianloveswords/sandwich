@@ -1,0 +1,30 @@
+{
+  "name": "sandwich",
+  "version": "0.0.0",
+  "description": "For figuring out all of the combinations of things",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "async": "~0.1.22"
+  },
+  "devDependencies": {
+    "tap": "~0.3.1"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/tap test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brianloveswords/sandwich.git"
+  },
+  "keywords": [
+    "combinatoric",
+    "combinations",
+    "iterations",
+    "streaming"
+  ],
+  "author": "Brian J. Brennan",
+  "license": "MIT"
+}
