@@ -1,5 +1,4 @@
 var sandwich = require('..');
-var StreamString = require('../streamstring');
 var test = require('tap').test;
 var pathutil = require('path');
 var fs = require('fs');
@@ -21,21 +20,6 @@ test('sandwicher#pick: returns false when any index is out of bounds', function 
   var expect = null;
   t.same(result, expect);
   t.end();
-});
-
-test('sandwich#pipe', function (t) {
-  var streamstring = new StreamString();
-  var picker = new sandwich([
-    ['a', '1'],
-    ['b', '2'],
-    ['c', '3'],
-  ]);
-  picker.pipe(streamstring);
-  picker.on('end', function () {
-    var expect = 'a,b,c\n1,b,c\na,2,c\n1,2,c\na,b,3\n1,b,3\na,2,3\n1,2,3\n';
-    t.same(streamstring.value(), expect);
-    t.end();
-  });
 });
 
 test('sandwich#next', function (t) {

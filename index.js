@@ -1,19 +1,9 @@
 var Places = require('./places');
-var Stream = require('stream');
-var util = require('util');
 
 function Sandwich(datasets) {
-  if (!(this instanceof Sandwich))
-    return new Sandwich(datasets);
   this.nextable = true;
-  this.separator('\n');
-  this.format(datasets.map(identity('%s')).join(','));
   this.processDataset(datasets);
-}; util.inherits(Sandwich, Stream)
-
-function identity(value) {
-  return function () { return value };
-}
+};
 
 /**
  * Stub, just in case we want to handle different types of inputs.
@@ -30,68 +20,6 @@ Sandwich.prototype.processDataset = function processDataset(datasets) {
   this._datasets = datasets;
   this._indices = new Places(maximums);
 };
-
-/**
- * Override `pipe` inherited from Stream
- */
-Sandwich.prototype.pipe = function pipe(endpoint) {
-  this.beginEmitting();
-  return Stream.prototype.pipe.call(this, endpoint);
-};
-
-/**
- * Start emitting `data` events. You shouldn't have to call this manually
- */
-
-Sandwich.prototype.beginEmitting = function beginEmitting() {
-  process.nextTick(function () {
-    var value;
-    while ((value = this.next()))
-      this.emit('data', this.formatOutput(value));
-    return this.emit('end');
-  }.bind(this));
-  return this;
-};
-
-
-/**
- * Get the formatted output for an index array
- *
- * @param {Array} value Array of values to format
- * @return {String} formatted output
- */
-
-Sandwich.prototype.formatOutput = function formatOutput(value) {
-  var format = this.format();
-  var separator = this.separator() || '';
-  var str;
-  if (format) {
-    str = util.format.bind(util, format).apply(util, value);
-    return str + separator;
-  }
-  return value.toString() + separator;
-};
-
-/**
- * Set the format for the output. Will be passed to `util.format`
- */
-Sandwich.prototype.format = accessor('_format');
-
-
-/**
- * Set the separator at the end of the string when emitting events
- */
-Sandwich.prototype.separator = accessor('_separator');
-
-function accessor(key) {
-  return function (value) {
-    if (arguments.length > 0) {
-      this[key] = value;
-      return this;
-    }
-    return this[key];
-  }
-}
 
 /**
  * Pick a set of elements from the dataset by an array of indices
@@ -117,7 +45,7 @@ Sandwich.prototype.pick = function pick(indices) {
 };
 
 /**
- * Pretend we have a real generator.
+ * Pretend we have a real iterator.
  */
 
 Sandwich.prototype.next = function next() {
