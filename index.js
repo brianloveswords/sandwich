@@ -3,14 +3,14 @@ var Stream = require('stream');
 var util = require('util');
 var async = require('async');
 
-function Multipick(datasets) {
-  if (!(this instanceof Multipick))
-    return new Multipick(datasets);
+function Sandwich(datasets) {
+  if (!(this instanceof Sandwich))
+    return new Sandwich(datasets);
   this.nextable = true;
   this.separator('\n');
   this.format(datasets.map(identity('%s')).join(','));
   this.processDataset(datasets);
-}; util.inherits(Multipick, Stream)
+}; util.inherits(Sandwich, Stream)
 
 function identity(value) {
   return function () { return value };
@@ -20,7 +20,7 @@ function identity(value) {
  * Stub, just in case we want to handle different types of inputs.
  */
 
-Multipick.prototype.processDataset = function processDataset(datasets) {
+Sandwich.prototype.processDataset = function processDataset(datasets) {
   var maximums;
   maximums = datasets.map(function (set) {
     return set.length - 1;
@@ -35,7 +35,7 @@ Multipick.prototype.processDataset = function processDataset(datasets) {
 /**
  * Override `pipe` inherited from Stream
  */
-Multipick.prototype.pipe = function pipe(endpoint) {
+Sandwich.prototype.pipe = function pipe(endpoint) {
   this.beginEmitting();
   return Stream.prototype.pipe.call(this, endpoint);
 };
@@ -44,7 +44,7 @@ Multipick.prototype.pipe = function pipe(endpoint) {
  * Start emitting `data` events. You shouldn't have to call this manually
  */
 
-Multipick.prototype.beginEmitting = function beginEmitting() {
+Sandwich.prototype.beginEmitting = function beginEmitting() {
   process.nextTick(function () {
     var value;
     while ((value = this.next()))
@@ -62,7 +62,7 @@ Multipick.prototype.beginEmitting = function beginEmitting() {
  * @return {String} formatted output
  */
 
-Multipick.prototype.formatOutput = function formatOutput(value) {
+Sandwich.prototype.formatOutput = function formatOutput(value) {
   var format = this.format();
   var separator = this.separator() || '';
   var str;
@@ -76,13 +76,13 @@ Multipick.prototype.formatOutput = function formatOutput(value) {
 /**
  * Set the format for the output. Will be passed to `util.format`
  */
-Multipick.prototype.format = accessor('_format');
+Sandwich.prototype.format = accessor('_format');
 
 
 /**
  * Set the separator at the end of the string when emitting events
  */
-Multipick.prototype.separator = accessor('_separator');
+Sandwich.prototype.separator = accessor('_separator');
 
 function accessor(key) {
   return function (value) {
@@ -102,7 +102,7 @@ function accessor(key) {
  *   of bounds
  */
 
-Multipick.prototype.pick = function pick(indices) {
+Sandwich.prototype.pick = function pick(indices) {
   var data = this._datasets;
   var result = [];
   var collection, element, elementIndex;
@@ -121,7 +121,7 @@ Multipick.prototype.pick = function pick(indices) {
  * Pretend we have a real generator.
  */
 
-Multipick.prototype.next = function next() {
+Sandwich.prototype.next = function next() {
   if (!this.nextable)
     return null;
 
@@ -138,7 +138,7 @@ Multipick.prototype.next = function next() {
  * @return {this}
  */
 
-Multipick.prototype.randomize = function randomize() {
+Sandwich.prototype.randomize = function randomize() {
   var data = this._datasets;
   for (var i = 0; i < data.length; i++)
     data[i].sort(shuffle);
@@ -148,6 +148,6 @@ Multipick.prototype.randomize = function randomize() {
 function shuffle() { return coin(); }
 function coin() { return Math.round(Math.random()); }
 
-module.exports = function multipick(dataset) {
-  return new Multipick(dataset);
+module.exports = function sandwich(dataset) {
+  return new Sandwich(dataset);
 };
