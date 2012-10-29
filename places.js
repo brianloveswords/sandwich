@@ -4,12 +4,10 @@ function Places(arr) {
   this.placeIndex = 0;
 }
 
-Places.prototype.inc = function inc(amount) {
+Places.prototype.next = function next(amount) {
   var idx = this.placeIndex;
-  // cheap equality check
-  if (this.value.join() === this.maximums.join())
-    return false;
-
+  if (this.maxedOut())
+    return null;
   if (this.value[idx] + 1 > this.maximums[idx]) {
     do {
       this.value[idx] = 0;
@@ -20,10 +18,11 @@ Places.prototype.inc = function inc(amount) {
   } else {
     this.value[idx]++;
   }
-  return true;
+  return this.value;
 };
 
 Places.prototype.maxedOut = function maxedOut() {
+  // cheap equality check
   return this.value.join() === this.maximums.join();
 };
 

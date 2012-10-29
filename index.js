@@ -55,7 +55,7 @@ Sandwich.prototype.next = function next() {
   var indices, value;
   indices = this._indices;
   value = this.pick(indices.value);
-  this.nextable = indices.inc();
+  this.nextable = indices.next();
   return value;
 };
 
