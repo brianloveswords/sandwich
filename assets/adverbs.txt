@@ -71,7 +71,7 @@ evenly
 eventually
 exactly
 excitedly
-extremely  
+extremely
 fairly
 faithfully
 famously
@@ -90,7 +90,7 @@ freely
 frenetically
 frightfully
 fully
-furiously 
+furiously
 generally
 generously
 gently
@@ -326,6 +326,6 @@ yearningly
 yesterday
 yieldingly
 youthfully
-zealously  
-zestfully   
+zealously
+zestfully
 zestily

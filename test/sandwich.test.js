@@ -49,3 +49,37 @@ test('sandwich#possibilities', function (t) {
   t.same(result, expect, 'should get the right amount of possibilities');
   t.end();
 });
+
+test('sandwich#random', function (t) {
+  function fileToArray(file) {
+    return fs.readFileSync(__dirname + '/../assets/' + file)
+      .toString()
+      .trim()
+      .split('\n')
+  }
+  var adverbs = fileToArray('adverbs.txt');
+  var adjectives = fileToArray('adjectives.txt');
+  var nouns = fileToArray('nouns.txt');
+  var iter = sandwich([adverbs, adjectives, nouns]);
+
+  var random, ordered;
+  var results = [];
+  var times = 10;
+
+  // testing something that's non-deterministic is hard -- this test
+  // can fail if the random pick, by chance, picks the same as what
+  // would be next. There are > 300 million options with the data set
+  // we're using so hopefully that's enough to make the chance of that
+  // happening very slim.
+  while (times--) {
+    random = iter.random().join('-');
+    ordered = iter.next().join('-');
+    results.push(random !== ordered);
+  }
+  t.ok(results.reduce(function (v, r) {
+    if (v) return v;
+    else return r;
+  }, false), 'at least one should be random');
+
+  t.end();
+});
