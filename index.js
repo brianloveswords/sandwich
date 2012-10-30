@@ -11,7 +11,7 @@ function Sandwich(datasets) {
 
 Sandwich.prototype.processDataset = function processDataset(datasets) {
   var maximums;
-  maximums = datasets.map(function (set) {
+  this.maximums = maximums = datasets.map(function (set) {
     return set.length - 1;
   });
   this.possibilities = maximums.reduce(function (product, value) {
@@ -65,18 +65,33 @@ Sandwich.prototype.next = function next() {
  * @return {this}
  */
 
-Sandwich.prototype.shuffle = function randomize() {
+Sandwich.prototype.shuffle = function shuffle() {
   var datasets = this._datasets;
   var idx = datasets.length;
   while (idx--)
-    datasets[idx].sort(shuffleSort);
+    datasets[idx].sort(randomize);
   return this;
 };
 
 // we want a value between -1 and 1
-function shuffleSort() {
+function randomize() {
   return (Math.random() * 3 | 0) - 1;
 }
+
+/**
+ * Pick a random thing from set
+ *
+ * @return {Array} result of random pick
+ * @see Sandwich#pick
+ */
+
+Sandwich.prototype.random = function random() {
+  var randomIndices = this.maximums.map(function (max) {
+    return Math.random() * max | 0;
+  });
+  return this.pick(randomIndices);
+};
+
 
 module.exports = function sandwich(dataset) {
   return new Sandwich(dataset);
