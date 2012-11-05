@@ -1,16 +1,14 @@
 {
   "name": "sandwich",
-  "version": "0.0.0",
-  "description": "For figuring out all of the combinations of things",
+  "version": "0.1.0",
+  "description": "Iterator generator getting ordered combinations of items",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
-  "dependencies": {
-    "deep-equal": "0.0.0"
-  },
   "devDependencies": {
-    "tap": "~0.3.1"
+    "tap": "~0.3.1",
+    "deep-equal": "0.0.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/tap test/*.test.js"

@@ -1,7 +1,6 @@
 # sandwich
 
-Generates an iterator for all of the combinations of items from an
-arbitrary amount of sets, each with arbitrary length.
+Iterator generator getting ordered combinations of items.
 
 # install
 
