@@ -1,22 +1,31 @@
-var Places = require('./places');
+const Places = require('./places');
 
-function Sandwich(datasets) {
-  this.initialize(datasets);
-};
-
-
-Sandwich.prototype.initialize = function initialize(datasets) {
-  var maximums;
+const methods = {}
+methods.initialize = function initialize(datasets) {
+  var maximums, err;
   this.nextable = true;
+
+  datasets.forEach(function (set) {
+    if (!Array.isArray(set)) {
+      err = new TypeError('Each input must be an array.')
+      err.input = set;
+      throw err;
+    }
+  });
+
   this.maximums = maximums = datasets.map(function (set) {
     return set.length - 1;
   });
+
   this.possibilities = maximums.reduce(function (product, value) {
     return product * (value + 1);
   }, 1);
+
   this._datasets = datasets;
   this._indices = new Places(maximums);
-};
+  return this;
+}
+
 
 /**
  * Pick a set of elements from the dataset by an array of indices
@@ -26,7 +35,7 @@ Sandwich.prototype.initialize = function initialize(datasets) {
  *   of bounds
  */
 
-Sandwich.prototype.pick = function pick(indices) {
+methods.pick = function pick(indices) {
   var data = this._datasets;
   var result = [];
   var collection, element, elementIndex;
@@ -42,10 +51,10 @@ Sandwich.prototype.pick = function pick(indices) {
 };
 
 /**
- * Pretend we have a real iterator.
+ * Pretend to be a real iterator
  */
 
-Sandwich.prototype.next = function next() {
+methods.next = function next() {
   if (!this.nextable)
     return null;
 
@@ -62,7 +71,7 @@ Sandwich.prototype.next = function next() {
  * @return {this}
  */
 
-Sandwich.prototype.shuffle = function shuffle() {
+methods.shuffle = function shuffle() {
   var datasets = this._datasets;
   var idx = datasets.length;
   while (idx--)
@@ -82,14 +91,15 @@ function randomize() {
  * @see Sandwich#pick
  */
 
-Sandwich.prototype.random = function random() {
+methods.random = function random() {
   var randomIndices = this.maximums.map(function (max) {
-    return Math.random() * max | 0;
+    return Math.random() * (max + 1) | 0;
   });
   return this.pick(randomIndices);
 };
 
-
-module.exports = function sandwich(sets) {
-  return new Sandwich(sets);
+module.exports = function sandwich() {
+  var sets = [].slice.call(arguments);
+  var iterator = Object.create(methods);
+  return iterator.initialize(sets);
 };
