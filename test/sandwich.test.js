@@ -95,6 +95,7 @@ test('sandwich#random, coverage', function (t) {
   var iter = sandwich(adjectives, animals);
   var times = 1000;
   while (times--) {
+    console.log(iter.random());
     foundFirst = foundFirst || deepEqual(iter.random(), first);
     foundLast = foundLast || deepEqual(iter.random(), last);
   }
