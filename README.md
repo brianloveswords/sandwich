@@ -11,7 +11,7 @@ $ npm install sandwich
 # example
 
 ```js
-const sandwich = require('./');
+const sandwich = require('sandwich');
 const adverbs = ['very'];
 const adjectives = ['woeful', 'lethargic', 'blissful'];
 const animals = ['sloth', 'bear', 'hawk'];
