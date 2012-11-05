@@ -1,6 +1,6 @@
 # sandwich [![Build Status](https://secure.travis-ci.org/brianloveswords/sandwich.png)](http://travis-ci.org/brianloveswords/sandwich)
 
-Iterator generator getting ordered combinations of items.
+Iterator generator for getting ordered combinations of items.
 
 # install
 
