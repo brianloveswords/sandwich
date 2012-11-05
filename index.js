@@ -1,16 +1,13 @@
 var Places = require('./places');
 
 function Sandwich(datasets) {
-  this.nextable = true;
-  this.processDataset(datasets);
+  this.initialize(datasets);
 };
 
-/**
- * Stub, just in case we want to handle different types of inputs.
- */
 
-Sandwich.prototype.processDataset = function processDataset(datasets) {
+Sandwich.prototype.initialize = function initialize(datasets) {
   var maximums;
+  this.nextable = true;
   this.maximums = maximums = datasets.map(function (set) {
     return set.length - 1;
   });
@@ -93,6 +90,6 @@ Sandwich.prototype.random = function random() {
 };
 
 
-module.exports = function sandwich(dataset) {
-  return new Sandwich(dataset);
+module.exports = function sandwich(sets) {
+  return new Sandwich(sets);
 };
